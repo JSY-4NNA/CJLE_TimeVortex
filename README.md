@@ -41,6 +41,23 @@ Each era contains mission, question, result, and failure screen animations:
 - `completion6070.gif` - 1960s-1970s completion screen
 - `completion80.gif` - 1980s completion screen
 
+## Getting Started
+
+### Prerequisites
+- Python 3.x must be installed on your system
+
+### Installation
+1. Clone or download this repository
+2. Ensure Python 3 is installed on your system
+
+### How to Start the Application
+
+Run the following command in your terminal:
+
+```bash
+python3 TimeVortexGAME
+```
+
 ## How to Play
 
 1. Start the game from the main menu
