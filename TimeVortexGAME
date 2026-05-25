@@ -3,11 +3,41 @@ import sys
 from PIL import Image
 
 pygame.init()
-pygame.display.set_caption("CJLE - Time Vortex")
 screen = pygame.display.set_mode((1152, 648))
 clock = pygame.time.Clock()
+is_fullscreen = False
+hover_surface = pygame.Surface((1152, 648), pygame.SRCALPHA)
+fs_btn = pygame.Rect(5, 5, 28, 18)
 
-def load_gif(path):
+def toggle_fullscreen():
+    global screen, is_fullscreen, hover_surface
+    is_fullscreen = not is_fullscreen
+    if is_fullscreen:
+        screen = pygame.display.set_mode((1152, 648), pygame.FULLSCREEN)
+    else:
+        screen = pygame.display.set_mode((1152, 648))
+    hover_surface = pygame.Surface((1152, 648), pygame.SRCALPHA)
+
+def draw_hover(btn_rect):
+    hover_surface.fill((0, 0, 0, 0))
+    pygame.draw.rect(hover_surface, (255, 255, 255, 50), btn_rect, border_radius=6)
+    screen.blit(hover_surface, (0, 0))
+
+def draw_fs_button():
+    pygame.draw.rect(screen, (40, 40, 40), fs_btn, border_radius=3)
+    pygame.draw.rect(screen, (180, 180, 180), fs_btn, 1, border_radius=3)
+    cx, cy = fs_btn.centerx, fs_btn.centery
+    arrow_col = (220, 220, 220)
+    pygame.draw.line(screen, arrow_col, (cx-7, cy-4), (cx-4, cy-4), 2)
+    pygame.draw.line(screen, arrow_col, (cx-7, cy-4), (cx-7, cy-1), 2)
+    pygame.draw.line(screen, arrow_col, (cx+3, cy+3), (cx+6, cy+3), 2)
+    pygame.draw.line(screen, arrow_col, (cx+6, cy+3), (cx+6, cy), 2)
+    pygame.draw.line(screen, arrow_col, (cx-7, cy+3), (cx-4, cy+3), 2)
+    pygame.draw.line(screen, arrow_col, (cx-7, cy+3), (cx-7, cy), 2)
+    pygame.draw.line(screen, arrow_col, (cx+3, cy-4), (cx+6, cy-4), 2)
+    pygame.draw.line(screen, arrow_col, (cx+6, cy-4), (cx+6, cy-1), 2)
+
+
     gif = Image.open(path)
     frames = []
     for f in range(gif.n_frames):
@@ -117,9 +147,9 @@ btn_1980_q2_a = pygame.Rect(22, 372, 306, 84)
 btn_1980_q2_b = pygame.Rect(289, 264, 306, 84)
 btn_1980_q2_c = pygame.Rect(559, 372, 306, 84)
 
-btn_1980_q3_a = pygame.Rect(50, 70, 400, 90)
-btn_1980_q3_b = pygame.Rect(50, 185, 400, 80)
-btn_1980_q3_c = pygame.Rect(50, 300, 400, 80)
+btn_1980_q3_a = pygame.Rect(50, 476, 245, 64)
+btn_1980_q3_b = pygame.Rect(155, 579, 245, 64)
+btn_1980_q3_c = pygame.Rect(50, 681, 245, 64)
 
 btn_comp6070_again = pygame.Rect(64, 530, 169, 97)
 btn_comp6070_menu  = pygame.Rect(430, 530, 169, 97)
@@ -137,7 +167,10 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             print(f"clicked at: {event.pos}, screen: {current_screen}, waiting: {waiting_for_click}")
 
-            if current_screen == "menu":
+            if fs_btn.collidepoint(event.pos):
+                toggle_fullscreen()
+
+            elif current_screen == "menu":
                 if btn_1960.collidepoint(event.pos):
                     coins_1960 = 5
                     go_to("1960_mission1")
@@ -374,5 +407,34 @@ while True:
             t = font_coins.render(str(coins_1980), True, (255, 255, 255))
             screen.blit(t, (622, 338))
 
+    mouse = pygame.mouse.get_pos()
+
+    if current_screen == "menu":
+        if btn_1960.collidepoint(mouse): draw_hover(btn_1960)
+        elif btn_1970.collidepoint(mouse): draw_hover(btn_1970)
+        elif btn_1980.collidepoint(mouse): draw_hover(btn_1980)
+    elif current_screen in QUESTION_SCREENS:
+        for btn in [btn_1960_q1_a, btn_1960_q1_b, btn_1960_q1_c,
+                    btn_1960_q2_a, btn_1960_q2_b, btn_1960_q2_c,
+                    btn_1960_q3_a, btn_1960_q3_b, btn_1960_q3_c,
+                    btn_1970_q1_a, btn_1970_q1_b, btn_1970_q1_c,
+                    btn_1970_q2_a, btn_1970_q2_b, btn_1970_q2_c,
+                    btn_1970_q3_a, btn_1970_q3_b, btn_1970_q3_c,
+                    btn_1980_q1_a, btn_1980_q1_b, btn_1980_q1_c,
+                    btn_1980_q2_a, btn_1980_q2_b, btn_1980_q2_c,
+                    btn_1980_q3_a, btn_1980_q3_b, btn_1980_q3_c]:
+            if btn.collidepoint(mouse):
+                draw_hover(btn)
+                break
+    elif current_screen in ("completion6070", "completion80"):
+        for btn in [btn_comp6070_again, btn_comp6070_menu, btn_comp6070_next,
+                    btn_comp80_again, btn_comp80_menu]:
+            if btn.collidepoint(mouse):
+                draw_hover(btn)
+                break
+    elif waiting_for_click and btn_continue.collidepoint(mouse):
+        draw_hover(btn_continue)
+
+    draw_fs_button()
     pygame.display.flip()
     clock.tick(60)
