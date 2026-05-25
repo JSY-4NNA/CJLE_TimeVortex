@@ -37,7 +37,9 @@ def draw_fs_button():
     pygame.draw.line(screen, arrow_col, (cx+3, cy-4), (cx+6, cy-4), 2)
     pygame.draw.line(screen, arrow_col, (cx+6, cy-4), (cx+6, cy-1), 2)
 
-def load_gif_frames(path):
+
+def load_gif(path):
+    """Load GIF frames from path and return list of pygame.Surface frames scaled to screen."""
     gif = Image.open(path)
     frames = []
     for f in range(gif.n_frames):
@@ -82,7 +84,7 @@ print("Loading...")
 ALL_GIFS = {}
 for name in ALL_GIF_SCREENS:
     try:
-        ALL_GIFS[name] = load_gif_frames(f"./{name}.gif")
+        ALL_GIFS[name] = load_gif(f"./{name}.gif")
     except:
         print(f"Missing: {name}.gif")
 
@@ -94,9 +96,9 @@ def go_to(screen_name):
     frame_timer = 0
     waiting_for_click = False
 
-coins_1960 = 5
-coins_1970 = 5
-coins_1980 = 5
+coins_1960 = 3
+coins_1970 = 3
+coins_1980 = 3
 
 current_screen = "introduction"
 frames = ALL_GIFS["introduction"]
@@ -414,15 +416,18 @@ while True:
         elif btn_1970.collidepoint(mouse): draw_hover(btn_1970)
         elif btn_1980.collidepoint(mouse): draw_hover(btn_1980)
     elif current_screen in QUESTION_SCREENS:
-        for btn in [btn_1960_q1_a, btn_1960_q1_b, btn_1960_q1_c,
-                    btn_1960_q2_a, btn_1960_q2_b, btn_1960_q2_c,
-                    btn_1960_q3_a, btn_1960_q3_b, btn_1960_q3_c,
-                    btn_1970_q1_a, btn_1970_q1_b, btn_1970_q1_c,
-                    btn_1970_q2_a, btn_1970_q2_b, btn_1970_q2_c,
-                    btn_1970_q3_a, btn_1970_q3_b, btn_1970_q3_c,
-                    btn_1980_q1_a, btn_1980_q1_b, btn_1980_q1_c,
-                    btn_1980_q2_a, btn_1980_q2_b, btn_1980_q2_c,
-                    btn_1980_q3_a, btn_1980_q3_b, btn_1980_q3_c]:
+        question_buttons = {
+            "1960_question1": [btn_1960_q1_a, btn_1960_q1_b, btn_1960_q1_c],
+            "1960_question2": [btn_1960_q2_a, btn_1960_q2_b, btn_1960_q2_c],
+            "1960_question3": [btn_1960_q3_a, btn_1960_q3_b, btn_1960_q3_c],
+            "1970_question1": [btn_1970_q1_a, btn_1970_q1_b, btn_1970_q1_c],
+            "1970_question2": [btn_1970_q2_a, btn_1970_q2_b, btn_1970_q2_c],
+            "1970_question3": [btn_1970_q3_a, btn_1970_q3_b, btn_1970_q3_c],
+            "1980_question1": [btn_1980_q1_a, btn_1980_q1_b, btn_1980_q1_c],
+            "1980_question2": [btn_1980_q2_a, btn_1980_q2_b, btn_1980_q2_c],
+            "1980_question3": [btn_1980_q3_a, btn_1980_q3_b, btn_1980_q3_c],
+        }
+        for btn in question_buttons.get(current_screen, []):
             if btn.collidepoint(mouse):
                 draw_hover(btn)
                 break
