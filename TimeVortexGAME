@@ -1,0 +1,377 @@
+import pygame
+import sys
+from PIL import Image
+
+pygame.init()
+screen = pygame.display.set_mode((1152, 648))
+clock = pygame.time.Clock()
+
+def load_gif(path):
+    gif = Image.open(path)
+    frames = []
+    for f in range(gif.n_frames):
+        gif.seek(f)
+        frame_img = gif.convert("RGBA")
+        pygame_frame = pygame.image.fromstring(frame_img.tobytes(), frame_img.size, "RGBA")
+        pygame_frame = pygame.transform.scale(pygame_frame, (1152, 648))
+        frames.append(pygame_frame)
+    return frames
+
+ALL_GIF_SCREENS = [
+    "introduction",
+    "1960_mission1", "1960_question1", "1960_fail1",  "1960_result1",
+    "1960_mission2", "1960_question2", "1960_fail2",  "1960_result2",
+    "1960_mission3", "1960_question3", "1960_fail31", "1960_fail32", "1960_result3",
+    "completion6070",
+    "1970_mission1", "1970_question1", "1970_fail11", "1970_fail12", "1970_result1",
+    "1970_mission2", "1970_question2", "1970_fail21", "1970_fail22", "1970_result2",
+    "1970_mission3", "1970_question3", "1970_fail31", "1970_fail32", "1970_result3",
+    "1980_mission1", "1980_question1", "1980_fail11", "1980_result1", "1980_fail12",
+    "1980_mission2", "1980_question2", "1980_fail21", "1980_result2", "1980_fail22",
+    "1980_mission3", "1980_question3", "1980_fail31", "1980_fail32", "1980_result3",
+    "completion80",
+]
+
+QUESTION_SCREENS = [
+    "1960_question1", "1960_question2", "1960_question3",
+    "1970_question1", "1970_question2", "1970_question3",
+    "1980_question1", "1980_question2", "1980_question3",
+]
+
+RESULT_FAIL_SCREENS = [
+    "1960_fail1", "1960_result1", "1960_fail2", "1960_result2",
+    "1960_fail31", "1960_fail32", "1960_result3",
+    "1970_fail11", "1970_fail12", "1970_result1", "1970_fail21", "1970_fail22", "1970_result2",
+    "1970_fail31", "1970_fail32", "1970_result3",
+    "1980_fail11", "1980_result1", "1980_fail12", "1980_fail21", "1980_result2", "1980_fail22",
+    "1980_fail31", "1980_fail32", "1980_result3",
+]
+
+print("Loading...")
+ALL_GIFS = {}
+for name in ALL_GIF_SCREENS:
+    try:
+        ALL_GIFS[name] = load_gif(f"./{name}.gif")
+    except:
+        print(f"Missing: {name}.gif")
+
+def go_to(screen_name):
+    global current_screen, frames, frame_index, frame_timer, waiting_for_click
+    current_screen = screen_name
+    frames = ALL_GIFS[screen_name]
+    frame_index = 0
+    frame_timer = 0
+    waiting_for_click = False
+
+coins_1960 = 5
+coins_1970 = 5
+coins_1980 = 5
+
+current_screen = "introduction"
+frames = ALL_GIFS["introduction"]
+frame_index = 0
+frame_timer = 0
+FRAME_DELAY = 3
+waiting_for_click = False
+
+menu_img = pygame.image.load("./menu.png")
+menu_img = pygame.transform.scale(menu_img, (1152, 648))
+
+font_coins = pygame.font.SysFont("Arial", 32, bold=True)
+
+btn_1960 = pygame.Rect(26, 200, 336, 350)
+btn_1970 = pygame.Rect(404, 200, 336, 350)
+btn_1980 = pygame.Rect(793, 200, 336, 350)
+btn_continue = pygame.Rect(900, 560, 180, 80)
+
+btn_1960_q1_a = pygame.Rect(454, 270, 406, 90)
+btn_1960_q1_b = pygame.Rect(454, 410, 406, 76)
+btn_1960_q1_c = pygame.Rect(454, 530, 406, 65)
+
+btn_1960_q2_a = pygame.Rect(50, 280, 448, 91)
+btn_1960_q2_b = pygame.Rect(50, 390, 448, 91)
+btn_1960_q2_c = pygame.Rect(50, 500, 448, 91)
+
+btn_1960_q3_a = pygame.Rect(50, 210, 450, 89)
+btn_1960_q3_b = pygame.Rect(50, 370, 450, 78)
+btn_1960_q3_c = pygame.Rect(50, 530, 450, 66)
+
+btn_1970_q1_a = pygame.Rect(50, 210, 230, 122)
+btn_1970_q1_b = pygame.Rect(380, 340, 230, 134)
+btn_1970_q1_c = pygame.Rect(750, 480, 280, 134)
+
+btn_1970_q2_a = pygame.Rect(147, 80, 234, 120)
+btn_1970_q2_b = pygame.Rect(21, 290, 231, 133)
+btn_1970_q2_c = pygame.Rect(152, 460, 221, 133)
+
+btn_1970_q3_a = pygame.Rect(84, 50, 781, 75)
+btn_1970_q3_b = pygame.Rect(84, 160, 781, 75)
+btn_1970_q3_c = pygame.Rect(84, 270, 781, 75)
+
+btn_1980_q1_a = pygame.Rect(700, 40, 306, 82)
+btn_1980_q1_b = pygame.Rect(700, 155, 306, 82)
+btn_1980_q1_c = pygame.Rect(700, 300, 306, 82)
+
+btn_1980_q2_a = pygame.Rect(22, 372, 306, 84)
+btn_1980_q2_b = pygame.Rect(289, 264, 306, 84)
+btn_1980_q2_c = pygame.Rect(559, 372, 306, 84)
+
+btn_1980_q3_a = pygame.Rect(50, 70, 400, 90)
+btn_1980_q3_b = pygame.Rect(50, 185, 400, 80)
+btn_1980_q3_c = pygame.Rect(50, 300, 400, 80)
+
+btn_comp6070_again = pygame.Rect(64, 530, 169, 97)
+btn_comp6070_menu  = pygame.Rect(430, 530, 169, 97)
+btn_comp6070_next  = pygame.Rect(800, 530, 169, 104)
+
+btn_comp80_again = pygame.Rect(64, 530, 169, 97)
+btn_comp80_menu  = pygame.Rect(800, 530, 169, 104)
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print(f"clicked at: {event.pos}, screen: {current_screen}, waiting: {waiting_for_click}")
+
+            if current_screen == "menu":
+                if btn_1960.collidepoint(event.pos):
+                    coins_1960 = 5
+                    go_to("1960_mission1")
+                elif btn_1970.collidepoint(event.pos):
+                    coins_1970 = 5
+                    go_to("1970_mission1")
+                elif btn_1980.collidepoint(event.pos):
+                    coins_1980 = 5
+                    go_to("1980_mission1")
+
+            elif current_screen == "1960_mission1" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1960_question1")
+            elif current_screen == "1960_mission2" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1960_question2")
+            elif current_screen == "1960_mission3" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1960_question3")
+
+            elif current_screen == "1960_question1":
+                if btn_1960_q1_a.collidepoint(event.pos):
+                    coins_1960 -= 1
+                    go_to("1960_fail1")
+                elif btn_1960_q1_b.collidepoint(event.pos):
+                    coins_1960 -= 1
+                    go_to("1960_fail1")
+                elif btn_1960_q1_c.collidepoint(event.pos):
+                    coins_1960 += 1
+                    go_to("1960_result1")
+            elif current_screen == "1960_question2":
+                if btn_1960_q2_a.collidepoint(event.pos):
+                    coins_1960 -= 1
+                    go_to("1960_fail2")
+                elif btn_1960_q2_b.collidepoint(event.pos):
+                    coins_1960 += 1
+                    go_to("1960_result2")
+                elif btn_1960_q2_c.collidepoint(event.pos):
+                    coins_1960 -= 1
+                    go_to("1960_fail2")
+            elif current_screen == "1960_question3":
+                if btn_1960_q3_a.collidepoint(event.pos):
+                    coins_1960 -= 1
+                    go_to("1960_fail31")
+                elif btn_1960_q3_b.collidepoint(event.pos):
+                    coins_1960 -= 1
+                    go_to("1960_fail32")
+                elif btn_1960_q3_c.collidepoint(event.pos):
+                    coins_1960 += 1
+                    go_to("1960_result3")
+
+            elif current_screen == "1960_result1" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1960_mission2")
+            elif current_screen == "1960_fail1" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1960_mission2")
+            elif current_screen == "1960_result2" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1960_mission3")
+            elif current_screen == "1960_fail2" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1960_mission3")
+            elif current_screen in ("1960_result3", "1960_fail31", "1960_fail32") and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("completion6070")
+
+            elif current_screen == "completion6070":
+                if btn_comp6070_again.collidepoint(event.pos):
+                    coins_1960 = 5
+                    go_to("1960_mission1")
+                elif btn_comp6070_menu.collidepoint(event.pos):
+                    current_screen = "menu"
+                elif btn_comp6070_next.collidepoint(event.pos):
+                    coins_1970 = 5
+                    go_to("1970_mission1")
+
+            elif current_screen == "1970_mission1" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1970_question1")
+            elif current_screen == "1970_mission2" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1970_question2")
+            elif current_screen == "1970_mission3" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1970_question3")
+
+            elif current_screen == "1970_question1":
+                if btn_1970_q1_a.collidepoint(event.pos):
+                    coins_1970 -= 1
+                    go_to("1970_fail11")
+                elif btn_1970_q1_b.collidepoint(event.pos):
+                    coins_1970 -= 1
+                    go_to("1970_fail12")
+                elif btn_1970_q1_c.collidepoint(event.pos):
+                    coins_1970 += 1
+                    go_to("1970_result1")
+            elif current_screen == "1970_question2":
+                if btn_1970_q2_a.collidepoint(event.pos):
+                    coins_1970 -= 1
+                    go_to("1970_fail22")
+                elif btn_1970_q2_b.collidepoint(event.pos):
+                    coins_1970 -= 1
+                    go_to("1970_fail21")
+                elif btn_1970_q2_c.collidepoint(event.pos):
+                    coins_1970 += 1
+                    go_to("1970_result2")
+            elif current_screen == "1970_question3":
+                if btn_1970_q3_a.collidepoint(event.pos):
+                    coins_1970 += 1
+                    go_to("1970_result3")
+                elif btn_1970_q3_b.collidepoint(event.pos):
+                    coins_1970 -= 1
+                    go_to("1970_fail31")
+                elif btn_1970_q3_c.collidepoint(event.pos):
+                    coins_1970 -= 1
+                    go_to("1970_fail32")
+
+            elif current_screen == "1970_result1" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1970_mission2")
+            elif current_screen in ("1970_fail11", "1970_fail12") and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1970_mission2")
+            elif current_screen == "1970_result2" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1970_mission3")
+            elif current_screen in ("1970_fail21", "1970_fail22") and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1970_mission3")
+            elif current_screen in ("1970_result3", "1970_fail31", "1970_fail32") and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("completion6070")
+
+            elif current_screen == "1980_mission1" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1980_question1")
+            elif current_screen == "1980_mission2" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1980_question2")
+            elif current_screen == "1980_mission3" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1980_question3")
+
+            elif current_screen == "1980_question1":
+                if btn_1980_q1_a.collidepoint(event.pos):
+                    coins_1980 -= 1
+                    go_to("1980_fail11")
+                elif btn_1980_q1_b.collidepoint(event.pos):
+                    coins_1980 += 1
+                    go_to("1980_result1")
+                elif btn_1980_q1_c.collidepoint(event.pos):
+                    coins_1980 -= 1
+                    go_to("1980_fail12")
+            elif current_screen == "1980_question2":
+                if btn_1980_q2_a.collidepoint(event.pos):
+                    coins_1980 += 1
+                    go_to("1980_result2")
+                elif btn_1980_q2_b.collidepoint(event.pos):
+                    coins_1980 -= 1
+                    go_to("1980_fail21")
+                elif btn_1980_q2_c.collidepoint(event.pos):
+                    coins_1980 -= 1
+                    go_to("1980_fail22")
+            elif current_screen == "1980_question3":
+                if btn_1980_q3_a.collidepoint(event.pos):
+                    coins_1980 -= 1
+                    go_to("1980_fail31")
+                elif btn_1980_q3_b.collidepoint(event.pos):
+                    coins_1980 -= 1
+                    go_to("1980_fail32")
+                elif btn_1980_q3_c.collidepoint(event.pos):
+                    coins_1980 += 1
+                    go_to("1980_result3")
+
+            elif current_screen == "1980_result1" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1980_mission2")
+            elif current_screen in ("1980_fail11", "1980_fail12") and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1980_mission2")
+            elif current_screen == "1980_result2" and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1980_mission3")
+            elif current_screen in ("1980_fail21", "1980_fail22") and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("1980_mission3")
+            elif current_screen in ("1980_result3", "1980_fail31", "1980_fail32") and waiting_for_click:
+                if btn_continue.collidepoint(event.pos):
+                    go_to("completion80")
+
+            elif current_screen == "completion80":
+                if btn_comp80_again.collidepoint(event.pos):
+                    coins_1980 = 5
+                    go_to("1980_mission1")
+                elif btn_comp80_menu.collidepoint(event.pos):
+                    current_screen = "menu"
+
+    if current_screen in ALL_GIF_SCREENS:
+        frame_timer += 1
+        if frame_timer >= FRAME_DELAY:
+            frame_timer = 0
+            frame_index += 1
+            if current_screen == "introduction":
+                if frame_index >= len(frames):
+                    current_screen = "menu"
+                    frame_index = len(frames) - 1
+            elif current_screen not in QUESTION_SCREENS:
+                if frame_index >= len(frames):
+                    frame_index = len(frames) - 1
+                    waiting_for_click = True
+            else:
+                if frame_index >= len(frames):
+                    frame_index = len(frames) - 1
+
+    if current_screen == "menu":
+        screen.blit(menu_img, (0, 0))
+    elif current_screen in ALL_GIF_SCREENS:
+        screen.blit(frames[frame_index], (0, 0))
+        if current_screen in RESULT_FAIL_SCREENS:
+            decade = current_screen[:4]
+            if decade == "1960":
+                t = font_coins.render(str(coins_1960), True, (0, 0, 0))
+            elif decade == "1970":
+                t = font_coins.render(str(coins_1970), True, (0, 0, 0))
+            else:
+                t = font_coins.render(str(coins_1980), True, (0, 0, 0))
+            screen.blit(t, (777, 479))
+        elif current_screen == "completion6070":
+            coins = coins_1960 if coins_1960 != 5 else coins_1970
+            t = font_coins.render(str(coins), True, (255, 255, 255))
+            screen.blit(t, (622, 338))
+        elif current_screen == "completion80":
+            t = font_coins.render(str(coins_1980), True, (255, 255, 255))
+            screen.blit(t, (622, 338))
+
+    pygame.display.flip()
+    clock.tick(60)
