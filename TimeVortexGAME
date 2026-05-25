@@ -37,7 +37,7 @@ def draw_fs_button():
     pygame.draw.line(screen, arrow_col, (cx+3, cy-4), (cx+6, cy-4), 2)
     pygame.draw.line(screen, arrow_col, (cx+6, cy-4), (cx+6, cy-1), 2)
 
-
+def load_gif_frames(path):
     gif = Image.open(path)
     frames = []
     for f in range(gif.n_frames):
@@ -82,7 +82,7 @@ print("Loading...")
 ALL_GIFS = {}
 for name in ALL_GIF_SCREENS:
     try:
-        ALL_GIFS[name] = load_gif(f"./{name}.gif")
+        ALL_GIFS[name] = load_gif_frames(f"./{name}.gif")
     except:
         print(f"Missing: {name}.gif")
 
