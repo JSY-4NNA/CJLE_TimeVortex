@@ -3,6 +3,7 @@ import sys
 from PIL import Image
 
 pygame.init()
+pygame.display.set_caption("CJLE - Time Vortex")
 screen = pygame.display.set_mode((1152, 648))
 clock = pygame.time.Clock()
 
