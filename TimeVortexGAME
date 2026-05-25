@@ -174,13 +174,13 @@ while True:
 
             elif current_screen == "menu":
                 if btn_1960.collidepoint(event.pos):
-                    coins_1960 = 5
+                    coins_1960 = 3
                     go_to("1960_mission1")
                 elif btn_1970.collidepoint(event.pos):
-                    coins_1970 = 5
+                    coins_1970 = 3
                     go_to("1970_mission1")
                 elif btn_1980.collidepoint(event.pos):
-                    coins_1980 = 5
+                    coins_1980 = 3
                     go_to("1980_mission1")
 
             elif current_screen == "1960_mission1" and waiting_for_click:
@@ -242,12 +242,12 @@ while True:
 
             elif current_screen == "completion6070":
                 if btn_comp6070_again.collidepoint(event.pos):
-                    coins_1960 = 5
+                    coins_1960 = 3
                     go_to("1960_mission1")
                 elif btn_comp6070_menu.collidepoint(event.pos):
                     current_screen = "menu"
                 elif btn_comp6070_next.collidepoint(event.pos):
-                    coins_1970 = 5
+                    coins_1970 = 3
                     go_to("1970_mission1")
 
             elif current_screen == "1970_mission1" and waiting_for_click:
@@ -366,7 +366,7 @@ while True:
 
             elif current_screen == "completion80":
                 if btn_comp80_again.collidepoint(event.pos):
-                    coins_1980 = 5
+                    coins_1980 = 3
                     go_to("1980_mission1")
                 elif btn_comp80_menu.collidepoint(event.pos):
                     current_screen = "menu"
@@ -402,7 +402,7 @@ while True:
                 t = font_coins.render(str(coins_1980), True, (0, 0, 0))
             screen.blit(t, (777, 479))
         elif current_screen == "completion6070":
-            coins = coins_1960 if coins_1960 != 5 else coins_1970
+            coins = coins_1960 if coins_1960 != 3 else coins_1970
             t = font_coins.render(str(coins), True, (255, 255, 255))
             screen.blit(t, (622, 338))
         elif current_screen == "completion80":
