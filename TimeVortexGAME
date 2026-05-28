@@ -116,7 +116,7 @@ frame_timer = 0
 FRAME_DELAY = 3
 waiting_for_click = False
 
-menu_img = pygame.image.load("./menu.png")
+menu_img = pygame.image.load("./assets/menu.png")
 menu_img = pygame.transform.scale(menu_img, (1152, 648))
 
 font_coins = pygame.font.SysFont("Arial", 32, bold=True)
