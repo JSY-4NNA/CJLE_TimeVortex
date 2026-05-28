@@ -1,14 +1,17 @@
 import pygame
 import sys
 from PIL import Image
+# pygame natively only reads the absolute first frame of a GIF and freezes, so I'm using Pillow (a library) to manually slice the GIF apart and grab every frame
 
 pygame.init()
 screen = pygame.display.set_mode((1152, 648))
 clock = pygame.time.Clock()
 is_fullscreen = False
+
+# creating a transparent overlay surface to draw my custom button hover glows, this is good for users so they know  what they can interact with
 hover_surface = pygame.Surface((1152, 648), pygame.SRCALPHA)
 fs_btn = pygame.Rect(5, 5, 28, 18)
-
+# resetting the alpha surface after mode switches so the hovers don't break.
 def toggle_fullscreen():
     global screen, is_fullscreen, hover_surface
     is_fullscreen = not is_fullscreen
@@ -19,6 +22,7 @@ def toggle_fullscreen():
     hover_surface = pygame.Surface((1152, 648), pygame.SRCALPHA)
 
 def draw_hover(btn_rect):
+    # clearing out the old glow before drawing a new one so the screen doesn't get flooded with overlapping rectangles as the mouse moves around
     hover_surface.fill((0, 0, 0, 0))
     pygame.draw.rect(hover_surface, (255, 255, 255, 50), btn_rect, border_radius=6)
     screen.blit(hover_surface, (0, 0))
@@ -37,13 +41,13 @@ def draw_fs_button():
     pygame.draw.line(screen, arrow_col, (cx+3, cy-4), (cx+6, cy-4), 2)
     pygame.draw.line(screen, arrow_col, (cx+6, cy-4), (cx+6, cy-1), 2)
 
-
 def load_gif(path):
-    """Load GIF frames from path and return list of pygame.Surface frames scaled to screen."""
+# splits a GIF into standard Pygame-friendly frames and caches them."""
     gif = Image.open(path)
     frames = []
     for f in range(gif.n_frames):
         gif.seek(f)
+        # converting to RGBA format so any transparent canvas backgrounds in the original GIFs are the same
         frame_img = gif.convert("RGBA")
         pygame_frame = pygame.image.fromstring(frame_img.tobytes(), frame_img.size, "RGBA")
         pygame_frame = pygame.transform.scale(pygame_frame, (1152, 648))
@@ -51,6 +55,7 @@ def load_gif(path):
     return frames
 
 ALL_GIF_SCREENS = [
+    #preloading all 49 animations into a dictionary up front means screen swaps are instant/smooth
     "introduction",
     "1960_mission1", "1960_question1", "1960_fail1",  "1960_result1",
     "1960_mission2", "1960_question2", "1960_fail2",  "1960_result2",
@@ -82,13 +87,16 @@ RESULT_FAIL_SCREENS = [
 
 print("Loading...")
 ALL_GIFS = {}
+# IMPORTANT!: loading images during gameplay makes it very slow, so preloading all animations into a dictionary at the beginning means screen swaps don't lag
 for name in ALL_GIF_SCREENS:
     try:
-        ALL_GIFS[name] = load_gif(f"./{name}.gif")
+        ALL_GIFS[name] = load_gif(f"./assets/{name}.gif")
     except:
+        # SOME DEBUG & SAFTEY BLOCK!: error trapping so a typo or missing file won't crash the entire program at startup
         print(f"Missing: {name}.gif")
 
 def go_to(screen_name):
+    """Global state manager that clears the active counters and swaps game screens smoothly."""
     global current_screen, frames, frame_index, frame_timer, waiting_for_click
     current_screen = screen_name
     frames = ALL_GIFS[screen_name]
@@ -96,6 +104,7 @@ def go_to(screen_name):
     frame_timer = 0
     waiting_for_click = False
 
+# individual coin states to prevent cross-decade score bleed.
 coins_1960 = 3
 coins_1970 = 3
 coins_1980 = 3
@@ -112,6 +121,8 @@ menu_img = pygame.transform.scale(menu_img, (1152, 648))
 
 font_coins = pygame.font.SysFont("Arial", 32, bold=True)
 
+# the invisible box regions were mapped out by hand because Canva coordinates and Pygame pixel grids don't align automatically
+# not very clean or exact because i put more effort into other parts of the game, but it works
 btn_1960 = pygame.Rect(26, 200, 336, 350)
 btn_1970 = pygame.Rect(404, 200, 336, 350)
 btn_1980 = pygame.Rect(793, 200, 336, 350)
@@ -160,7 +171,9 @@ btn_comp6070_next  = pygame.Rect(800, 530, 169, 104)
 btn_comp80_again = pygame.Rect(64, 530, 169, 97)
 btn_comp80_menu  = pygame.Rect(800, 530, 169, 104)
 
+# THE MAIN LOOP!: ticks 60 times a second to check for interactions and redraw the frames
 while True:
+    #checking cursor intersections every tick to highlight standard interactive components
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -371,6 +384,7 @@ while True:
                 elif btn_comp80_menu.collidepoint(event.pos):
                     current_screen = "menu"
 
+    # "animation player" 
     if current_screen in ALL_GIF_SCREENS:
         frame_timer += 1
         if frame_timer >= FRAME_DELAY:
@@ -381,17 +395,22 @@ while True:
                     current_screen = "menu"
                     frame_index = len(frames) - 1
             elif current_screen not in QUESTION_SCREENS:
+                # Normal story cutscenes freeze at the end and wait for the click flag.
                 if frame_index >= len(frames):
                     frame_index = len(frames) - 1
                     waiting_for_click = True
             else:
+                # Question UI backgrounds loop back to frame 0 infinitely so they stay active.
                 if frame_index >= len(frames):
-                    frame_index = len(frames) - 1
+                    frame_index = 0
 
+    #some rendering operations
     if current_screen == "menu":
         screen.blit(menu_img, (0, 0))
     elif current_screen in ALL_GIF_SCREENS:
         screen.blit(frames[frame_index], (0, 0))
+        
+        # Overlaying the live dynamic coin count text perfectly on top of our canvas coordinates.
         if current_screen in RESULT_FAIL_SCREENS:
             decade = current_screen[:4]
             if decade == "1960":
@@ -411,6 +430,7 @@ while True:
 
     mouse = pygame.mouse.get_pos()
 
+    # checking cursor intersections every tick to highlight standard interactive components
     if current_screen == "menu":
         if btn_1960.collidepoint(mouse): draw_hover(btn_1960)
         elif btn_1970.collidepoint(mouse): draw_hover(btn_1970)
