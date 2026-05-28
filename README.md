@@ -1,74 +1,36 @@
-# CJLE_TimeVortex
+Time Vortex: An Interactive History Education Application
 
-A time travel game made by 8th grader for a business competition event.
+An interactive, text-based history application built from scratch using Python, Pygame, and Pillow. This software is designed for intermediate students, shifting traditional historical learning from passive memorization into active, conditional branching logic puzzles.
 
-## Overview
+Technical Highlights & Architecture
 
-TimeVortex is an interactive time travel adventure game where players navigate through different historical periods (1960s, 1970s, and 1980s) completing missions and answering trivia questions.
+1. Custom Animation Pipeline (`load_gif`)
+   Problem: Pygame's native image loader cannot process animated GIF files natively; it loads only the first frame and freezes.
+   Solution: Integrated the `Pillow` library to programmatically parse individual frames (`gif.seek()`), convert pixel data matrices into an RGBA byte-string sequence to maintain transparency, and scale them dynamically into cacheable Pygame surfaces.
 
-## Game Features
+2. Memory Cache Optimization (Startup Preloading)
+   - To eliminate micro-stutters, framework lag, and file-access dropouts during active gameplay, all 49 heavy animated assets are pre-rendered and preloaded into a global dictionary storage layer (`ALL_GIFS`) at application startup. Screen swaps are entirely instantaneous.
 
-### Time Periods
-- **1960s Era**: Missions, questions, and challenges set in the 1960s
-- **1970s Era**: Missions, questions, and challenges set in the 1970s  
-- **1980s Era**: Missions, questions, and challenges set in the 1980s
+3. Global State Management (`go_to`)
+   - Engineered an efficient state-handler that executes global scene transitions in just 5 lines of code. It programmatically flushes active frame indexes, clears time tracking thresholds, and re-routes active arrays instantly, avoiding repetitive and messy logic blocks.
 
-### Game Elements
-- **Missions**: Navigate through objectives in each time period
-- **Questions**: Test your knowledge with trivia questions
-- **Results**: Get feedback on your performance
-- **Completion Tracking**: Progress through multiple eras
+4. Fault-Tolerant Asset Pipeline (`try/except`)
+   - The entire asset loading loop is wrapped inside explicit Python exception traps. If a graphical component is missing, corrupted, or unreadable, the system catches the error, alerts the console with a debugging code, and allows the core program to run safely without throwing a fatal crash.
 
-## Files
+5. Interface Coordinate Resolution (`pygame.Rect`)
+   - UI assets were constructed dynamically inside Canva. To resolve coordinate grid conflicts between Canva's canvas layout and Pygame's pixel matrix, a custom terminal logging utility was utilized to track structural cursor values and manually map out over 30 collision bounding-boxes.
 
-### Game Files
-- `TimeVortexGAME` - Main game executable/script
-- `timevortex` - Additional game file
-- `menu.png` - Menu interface image
+Future Scalability & Improvements
 
-### Assets
-- `introduction.gif` - Game introduction animation
-- `menu.png` - Main menu screen
+Data Decoupling via JSON Engine: Future iterations will transition all historical dialogue narratives, quiz prompts, and conditional routing criteria out of the core Python engine and into external `.json` configuration models. This will allow non-technical educators to scale out and deploy custom history modules seamlessly without modifying the underlying source files.
+Viewport for Precision in Graphics/Sprites: Implementing dynamic vector scaling algorithms to map pixel coordinate fields linearly across non-standard monitor resolutions while preserving canvas asset aspect ratios.
 
-### Time Period Assets
-Each era contains mission, question, result, and failure screen animations:
-- `196X_mission[1-3].gif` - Era-specific missions
-- `196X_question[1-3].gif` - Era-specific quiz questions
-- `196X_result[1-3].gif` - Mission success screens
-- `196X_fail[1-3].gif` - Mission failure screens
+Requirements & Execution
 
-### Completion Assets
-- `completion6070.gif` - 1960s-1970s completion screen
-- `completion80.gif` - 1980s completion screen
-
-## Getting Started
-
-### Prerequisites
-- Python 3.x must be installed on your system
-
-### Installation
-1. Clone or download this repository
-2. Ensure Python 3 is installed on your system
-
-### How to Start the Application
-
-Run the following command in your terminal:
+To run the program, type:
+**python3 TimeVortexGAME** into your terminal/console
+Ensure you have Python 3 or Python shell installed alongside thes libraries before you run the game:
 
 ```bash
-python3 TimeVortexGAME
-```
-
-## How to Play
-
-1. Start the game from the main menu
-2. Select a time period to explore
-3. Complete missions by making choices or answering questions
-4. Progress through all three eras to complete the game
-
-## Credits
-
-Developed for a business competition event.
-
-## License
-
-This project is provided as-is for educational and competition purposes.
+pip install pygame pillow
+python main.py
