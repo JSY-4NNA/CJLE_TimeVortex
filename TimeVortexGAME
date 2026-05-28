@@ -93,7 +93,7 @@ for name in ALL_GIF_SCREENS:
         ALL_GIFS[name] = load_gif(f"./assets/{name}.gif")
     except:
         # SOME DEBUG & SAFTEY BLOCK!: error trapping so a typo or missing file won't crash the entire program at startup
-        print(f"Missing: {name}.gif")
+        print(f"Missing: ./assets/{name}.gif")
 
 def go_to(screen_name):
     """Global state manager that clears the active counters and swaps game screens smoothly."""
@@ -394,15 +394,11 @@ while True:
                 if frame_index >= len(frames):
                     current_screen = "menu"
                     frame_index = len(frames) - 1
-            elif current_screen not in QUESTION_SCREENS:
-                # Normal story cutscenes freeze at the end and wait for the click flag.
+            else:
+                # every single screen (missions and questions) will now play through once, freeze on the last frame, and wait for user interaction
                 if frame_index >= len(frames):
                     frame_index = len(frames) - 1
                     waiting_for_click = True
-            else:
-                # Question UI backgrounds loop back to frame 0 infinitely so they stay active.
-                if frame_index >= len(frames):
-                    frame_index = 0
 
     #some rendering operations
     if current_screen == "menu":
